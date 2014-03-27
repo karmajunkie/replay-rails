@@ -8,7 +8,7 @@ module Replay
         self.table_name = "domain_events"
 
         def readonly?
-          true
+          persisted?
         end
 
         def destroy
@@ -27,7 +27,7 @@ module Replay
         end
 
         def event
-          event_type.constantize.new(JSON.parse(event_data))
+          event_type.constantize.new(JSON.parse(data))
         end
 
         def self.events_for(stream_id)
@@ -40,8 +40,8 @@ module Replay
 
       end
 
-      def self.published(stream_id, event)
-        Event.create(stream_id: stream_id, event_type: event.class.to_s, event_data: event.to_json)
+      def self.published(stream_id, event, envelope={})
+        Event.create(stream_id: stream_id, event_type: event.class.to_s, data: event.to_json, envelope_data: envelope.to_json)
       end
 
       def self.event_stream(stream_id)
