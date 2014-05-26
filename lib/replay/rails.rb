@@ -40,8 +40,8 @@ module Replay
 
       end
 
-      def self.published(stream_id, event, envelope={})
-        Event.create(stream_id: stream_id, event_type: event.class.to_s, data: event.to_json, envelope_data: envelope.to_json)
+      def self.published(envelope)
+        Event.create(stream_id: envelope.stream_id, event_type: envelope.type, data: envelope.event.to_json, envelope_data: envelope.metadata.to_json)
       end
 
       def self.event_stream(stream_id)
