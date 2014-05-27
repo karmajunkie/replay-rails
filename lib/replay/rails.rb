@@ -30,12 +30,24 @@ module Replay
           event_type.constantize.new(JSON.parse(data))
         end
 
+        def metadata
+          Hash.new(envelope_data)
+        end
+
+        def envelope
+          @envelope ||= Replay::EventEnvelope.new(
+            stream_id,
+            event,
+            metadata
+          )
+        end
+
         def self.events_for(stream_id)
           where(:stream_id => stream_id).order('created_at asc')
         end
 
         def self.event_stream(stream_id)
-          events_for(stream_id).to_a.map(&:event)
+          events_for(stream_id).to_a.map(&:envelope)
         end
 
       end
