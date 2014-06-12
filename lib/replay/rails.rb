@@ -30,15 +30,12 @@ module Replay
           event_type.constantize.new(JSON.parse(data))
         end
 
-        def metadata
-          Hash.new(envelope_data)
-        end
 
         def envelope
           @envelope ||= Replay::EventEnvelope.new(
             stream_id,
             event,
-            metadata
+            envelope_data 
           )
         end
 
