@@ -3,7 +3,7 @@ require "replay/rails/version"
 
 module Replay
   module Rails
-    class ActiveRecordEventStore 
+    class ActiveRecordEventStore
       class Event < ActiveRecord::Base
         self.table_name = "domain_events"
 
@@ -27,15 +27,26 @@ module Replay
         end
 
         def event
-          event_type.constantize.new(JSON.parse(data))
+          if data.is_a? String
+            event_type.constantize.new(JSON.parse(data))
+          else
+            event_type.constantize.new(data)
+          end
         end
 
+        def metadata
+          if envelope_data.is_a? String
+            JSON.parse(envelope_data)
+          else
+            envelope_data
+          end
+        end
 
         def envelope
           @envelope ||= Replay::EventEnvelope.new(
             stream_id,
             event,
-            envelope_data 
+            envelope_data
           )
         end
 
@@ -46,7 +57,10 @@ module Replay
         def self.event_stream(stream_id)
           events_for(stream_id).to_a.map(&:envelope)
         end
+      end
 
+      def self.archive(stream_id)
+        live_events = Arel::Table.new(:domain_events)
       end
 
       def self.published(envelope)
